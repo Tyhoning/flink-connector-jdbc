@@ -15,8 +15,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <gaussdb.version>42.7.3</gaussdb.version>
-        <postgres.version>42.7.3</postgres.version>
+        <gaussdb.version>505.2.1</gaussdb.version>
     </properties>
 
     <dependencies>
@@ -72,14 +71,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Postgres -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgres.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
+        <!-- Gaussdb -->
         <dependency>
             <groupId>com.huawei</groupId>
             <artifactId>gaussdbjdbc</artifactId>
@@ -95,12 +87,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Postgres tests -->
-        <dependency>
+        <!-- Gaussdb tests -->
+<!--        <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
+            <artifactId>gaussdb</artifactId>
             <scope>test</scope>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
 
