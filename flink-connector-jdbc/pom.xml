@@ -69,6 +69,11 @@ under the License.
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-connector-jdbc-gaussdb</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-jdbc-postgres</artifactId>
 			<version>${project.version}</version>
 		</dependency>

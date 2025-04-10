@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <gaussdb.version>505.2.1</gaussdb.version>
+        <gaussdb.version>506.0.0.b058</gaussdb.version>
     </properties>
 
     <dependencies>
@@ -73,13 +73,13 @@
 
         <!-- Gaussdb -->
         <dependency>
-            <groupId>com.huawei</groupId>
+            <groupId>com.huaweicloud.gaussdb</groupId>
             <artifactId>gaussdbjdbc</artifactId>
-            <version>1.0.0</version> <!-- 请根据需要选择合适的版本 -->
+            <version>506.0.0.b058</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Assertions test dependencies -->
 
+        <!-- Assertions test dependencies -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -111,5 +111,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

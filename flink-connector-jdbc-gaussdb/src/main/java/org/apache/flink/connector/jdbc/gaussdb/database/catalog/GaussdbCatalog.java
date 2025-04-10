@@ -45,22 +45,16 @@ import java.util.Set;
 
 import static org.apache.flink.connector.jdbc.JdbcConnectionOptions.getBriefAuthProperties;
 
-/**
- * A catalog implementation for GaussDB This class provides functionality to interact with GaussDB
- * databases, schemas, and tables, while filtering out built-in databases and schemas that should
- * not be exposed to users.
- */
+/** Catalog for GaussDB. */
 @Internal
 public class GaussdbCatalog extends AbstractJdbcCatalog {
 
     private static final Logger LOG = LoggerFactory.getLogger(GaussdbCatalog.class);
 
-    /** The default database name for GaussDB. */
     public static final String DEFAULT_DATABASE = "gaussdb";
 
     // ------ GaussDB default objects that shouldn't be exposed to users ------
 
-    /** A set of built-in databases in GaussDB that should not be exposed to users. */
     private static final Set<String> builtinDatabases =
             new HashSet<String>() {
                 {
@@ -69,7 +63,6 @@ public class GaussdbCatalog extends AbstractJdbcCatalog {
                 }
             };
 
-    /** A set of built-in schemas in GaussDB that should not be exposed to users. */
     private static final Set<String> builtinSchemas =
             new HashSet<String>() {
                 {
@@ -81,19 +74,8 @@ public class GaussdbCatalog extends AbstractJdbcCatalog {
                 }
             };
 
-    /** The type mapper for converting GaussDB types to Flink types. */
     protected final JdbcCatalogTypeMapper dialectTypeMapper;
 
-    /**
-     * Constructs a new {@link GaussdbCatalog} instance for testing purposes.
-     *
-     * @param userClassLoader The class loader for user-defined classes.
-     * @param catalogName The name of the catalog.
-     * @param defaultDatabase The default database name.
-     * @param username The username for database authentication.
-     * @param pwd The password for database authentication.
-     * @param baseUrl The base URL for the database connection.
-     */
     @VisibleForTesting
     public GaussdbCatalog(
             ClassLoader userClassLoader,
@@ -110,15 +92,6 @@ public class GaussdbCatalog extends AbstractJdbcCatalog {
                 getBriefAuthProperties(username, pwd));
     }
 
-    /**
-     * Constructs a new {@link GaussdbCatalog} instance.
-     *
-     * @param userClassLoader The class loader for user-defined classes.
-     * @param catalogName The name of the catalog.
-     * @param defaultDatabase The default database name.
-     * @param baseUrl The base URL for the database connection.
-     * @param connectProperties The connection properties for the database.
-     */
     public GaussdbCatalog(
             ClassLoader userClassLoader,
             String catalogName,
@@ -134,19 +107,6 @@ public class GaussdbCatalog extends AbstractJdbcCatalog {
                 connectProperties);
     }
 
-    /**
-     * Constructs a new {@link GaussdbCatalog} instance (deprecated).
-     *
-     * @param userClassLoader The class loader for user-defined classes.
-     * @param catalogName The name of the catalog.
-     * @param defaultDatabase The default database name.
-     * @param username The username for database authentication.
-     * @param pwd The password for database authentication.
-     * @param baseUrl The base URL for the database connection.
-     * @param dialectTypeMapper The type mapper for converting GaussDB types to Flink types.
-     * @deprecated Use {@link #GaussdbCatalog(ClassLoader, String, String, String, Properties)}
-     *     instead.
-     */
     @Deprecated
     protected GaussdbCatalog(
             ClassLoader userClassLoader,
@@ -165,16 +125,6 @@ public class GaussdbCatalog extends AbstractJdbcCatalog {
                 getBriefAuthProperties(username, pwd));
     }
 
-    /**
-     * Constructs a new {@link GaussdbCatalog} instance.
-     *
-     * @param userClassLoader The class loader for user-defined classes.
-     * @param catalogName The name of the catalog.
-     * @param defaultDatabase The default database name.
-     * @param baseUrl The base URL for the database connection.
-     * @param dialectTypeMapper The type mapper for converting GaussDB types to Flink types.
-     * @param connectProperties The connection properties for the database.
-     */
     protected GaussdbCatalog(
             ClassLoader userClassLoader,
             String catalogName,
@@ -188,14 +138,9 @@ public class GaussdbCatalog extends AbstractJdbcCatalog {
 
     // ------ databases ------
 
-    /**
-     * Lists all databases in the GaussDB instance, excluding built-in databases.
-     *
-     * @return A list of database names.
-     * @throws CatalogException If an error occurs while listing databases.
-     */
     @Override
     public List<String> listDatabases() throws CatalogException {
+
         return extractColumnValuesBySQL(
                 defaultUrl,
                 "SELECT datname FROM pg_database;",
@@ -205,25 +150,12 @@ public class GaussdbCatalog extends AbstractJdbcCatalog {
 
     // ------ schemas ------
 
-    /**
-     * Returns the set of built-in schemas in GaussDB that should not be exposed to users.
-     *
-     * @return A set of built-in schema names.
-     */
     protected Set<String> getBuiltinSchemas() {
         return builtinSchemas;
     }
 
     // ------ tables ------
 
-    /**
-     * Retrieves a list of tables in the specified schemas, excluding built-in tables.
-     *
-     * @param conn The database connection.
-     * @param schemas The list of schemas to query.
-     * @return A list of table names in the format "schema.table".
-     * @throws SQLException If an error occurs while querying the database.
-     */
     protected List<String> getPureTables(Connection conn, List<String> schemas)
             throws SQLException {
         List<String> tables = Lists.newArrayList();
@@ -245,14 +177,6 @@ public class GaussdbCatalog extends AbstractJdbcCatalog {
         }
     }
 
-    /**
-     * Lists all tables in the specified database, excluding built-in tables.
-     *
-     * @param databaseName The name of the database.
-     * @return A list of table names in the format "schema.table".
-     * @throws DatabaseNotExistException If the specified database does not exist.
-     * @throws CatalogException If an error occurs while listing tables.
-     */
     @Override
     public List<String> listTables(String databaseName)
             throws DatabaseNotExistException, CatalogException {
@@ -282,67 +206,36 @@ public class GaussdbCatalog extends AbstractJdbcCatalog {
         }
     }
 
-    /**
-     * Converts a JDBC type to a Flink {@link DataType}.
-     *
-     * @param tablePath The path of the table.
-     * @param metadata The result set metadata.
-     * @param colIndex The column index.
-     * @return The corresponding Flink {@link DataType}.
-     * @throws SQLException If an error occurs while accessing the metadata.
-     */
+    /** Converts Gaussdb type to Flink {@link DataType}. */
     @Override
     protected DataType fromJDBCType(ObjectPath tablePath, ResultSetMetaData metadata, int colIndex)
             throws SQLException {
         return dialectTypeMapper.mapping(tablePath, metadata, colIndex);
     }
 
-    /**
-     * Checks if a table exists in the specified database.
-     *
-     * @param tablePath The path of the table.
-     * @return {@code true} if the table exists, {@code false} otherwise.
-     * @throws CatalogException If an error occurs while checking the table existence.
-     */
     @Override
     public boolean tableExists(ObjectPath tablePath) throws CatalogException {
+
         List<String> tables = null;
         try {
             tables = listTables(tablePath.getDatabaseName());
         } catch (DatabaseNotExistException e) {
             return false;
         }
+
         return tables.contains(getSchemaTableName(tablePath));
     }
 
-    /**
-     * Retrieves the table name from the given {@link ObjectPath}.
-     *
-     * @param tablePath The path of the table.
-     * @return The table name.
-     */
     @Override
     protected String getTableName(ObjectPath tablePath) {
         return GaussdbTablePath.fromFlinkTableName(tablePath.getObjectName()).getPgTableName();
     }
 
-    /**
-     * Retrieves the schema name from the given {@link ObjectPath}.
-     *
-     * @param tablePath The path of the table.
-     * @return The schema name.
-     */
     @Override
     protected String getSchemaName(ObjectPath tablePath) {
         return GaussdbTablePath.fromFlinkTableName(tablePath.getObjectName()).getPgSchemaName();
     }
 
-    /**
-     * Retrieves the full schema and table name from the given {@link ObjectPath}.
-     *
-     * @param tablePath The path of the table.
-     * @return The full schema and table name in the format "schema.table".
-     */
     @Override
     protected String getSchemaTableName(ObjectPath tablePath) {
         return GaussdbTablePath.fromFlinkTableName(tablePath.getObjectName()).getFullPath();
